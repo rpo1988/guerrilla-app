@@ -1,113 +1,132 @@
-import Image from 'next/image'
+'use client';
 
-export default function Home() {
+import { useQuery } from '@apollo/client';
+import { useState } from 'react';
+
+import { GET_PROPERTIES } from './apis/properties.api';
+import PropertyCard from './components/PropertyCard';
+import { IPropertiesResponse, IPropertyCategory } from './models/properties.model';
+
+const categories = ['All categories', ...Object.values(IPropertyCategory)];
+const initCategory = 0;
+const initOffset = 0;
+const initLimit = 3;
+
+export default function Landing() {
+  const [idxCategory, setIdxCategory] = useState<number>(initCategory);
+  const { loading, error, data, fetchMore, refetch } = useQuery<IPropertiesResponse>(
+    GET_PROPERTIES,
+    {
+      notifyOnNetworkStatusChange: true,
+      variables: {
+        offset: initOffset,
+        limit: initLimit,
+        category: initCategory ? categories[initCategory] : null,
+      },
+    },
+  );
+
+  const handleChangeCategory = (newCategory: IPropertyCategory) => {
+    const _newIdxCategory = categories.findIndex((item) => item === newCategory);
+    setIdxCategory(_newIdxCategory);
+    refetch({
+      offset: initOffset,
+      category: _newIdxCategory ? categories[_newIdxCategory] : null,
+    });
+  };
+
+  const handleLoadMore = () => {
+    const newOffset = data?.propertyCollection.items.length!;
+    fetchMore({
+      variables: {
+        offset: newOffset,
+      },
+    });
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className='flex w-full flex-col overflow-y-auto overflow-x-hidden'>
+      <section
+        id='welcome'
+        className='bg-lugar-blue bg-house-1 relative h-[800px] w-full bg-right-bottom bg-no-repeat'
+      >
+        <div className='mx-auto flex w-[1110px] items-start'>
+          <div className='text-lugar-dark mt-[176px] flex w-[635px] flex-col'>
+            <h1 className='text-lugar-dark  text-[90px] font-bold leading-[120%]'>
+              {'A home is built with love and dreams'}
+            </h1>
+            <p className='mt-[18px] text-[18px] leading-[120%]'>
+              {'Real estate farm that makes your dreams true'}
+            </p>
+            <div className='mt-[32px] flex flex-row gap-[30px]'>
+              <button
+                type='button'
+                className='bg-lugar-dark text-lugar-white flex items-center justify-center px-[24px] py-[18px] text-[14px] font-normal leading-[120%]'
+              >
+                {'Our projects'}
+              </button>
+              <button
+                type='button'
+                className='border-lugar-dark text-lugar-dark flex items-center justify-center border border-solid bg-transparent px-[24px] py-[18px] text-[14px] font-normal leading-[120%]'
+              >
+                {'Contact us'}
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      </section>
+      {!error && !!data?.propertyCollection.items.length && (
+        <section id='properties' className='bg-lugar-white w-full'>
+          <div className='text-lugar-dark mx-auto mb-[48px] mt-[150px] flex w-[1110px] flex-col'>
+            <h2 className='text-lugar-dark max-w-[540px] text-[48px] font-bold leading-[120%]'>
+              {'Properties'}
+            </h2>
+            <p className='text-lugar-gray mt-[12px] max-w-[540px] text-[18px] font-normal leading-[120%]'>
+              {'Turpis facilisis tempor pulvinar in lobortis ornare magna.'}
+            </p>
+            <div className='mt-[30px] flex flex-col'>
+              <div className='mb-[10px] flex flex-row justify-end'>
+                <select
+                  className='text-lugar-dark cursor-pointer appearance-none whitespace-nowrap bg-white py-2'
+                  value={categories[idxCategory]}
+                  disabled={loading}
+                  onChange={($event) =>
+                    handleChangeCategory($event.target.value as IPropertyCategory)
+                  }
+                >
+                  {categories.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className='grid grid-cols-3 gap-[30px]'>
+                {data?.propertyCollection.items.map((property) => (
+                  <PropertyCard
+                    key={property.id}
+                    address={property.address}
+                    title={property.title}
+                    url={property.image.url}
+                  />
+                ))}
+              </div>
+              {data?.propertyCollection.total > data?.propertyCollection.items.length && (
+                <button
+                  type='button'
+                  className='bg-lugar-dark text-lugar-white mx-auto mt-[32px] flex items-center justify-center px-[24px] py-[18px] text-[14px] font-normal leading-[120%]'
+                  disabled={loading}
+                  onClick={() => handleLoadMore()}
+                >
+                  {loading ? 'Loading...' : 'Load more'}
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+      <section id='history'></section>
+      <footer></footer>
     </main>
-  )
+  );
 }
