@@ -4,7 +4,7 @@ import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { PropsWithChildren } from 'react';
 import config from '../config/contentful';
 
-type ApolloAppProviderProps = PropsWithChildren;
+export type ApolloAppProviderProps = PropsWithChildren;
 
 const client = new ApolloClient({
   uri: `${config.baseUrl}`,

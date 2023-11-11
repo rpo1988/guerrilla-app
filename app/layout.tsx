@@ -5,7 +5,7 @@ import { PropsWithChildren } from 'react';
 import './globals.css';
 import ApolloAppProvider from './providers/ApolloProvider';
 
-type RootLayoutProps = PropsWithChildren;
+export type RootLayoutProps = PropsWithChildren;
 
 const mulish = Mulish({ subsets: ['latin'] });
 
