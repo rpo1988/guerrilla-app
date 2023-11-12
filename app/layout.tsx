@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { Mulish } from 'next/font/google';
 import { PropsWithChildren } from 'react';
-
 import './globals.css';
-import ApolloAppProvider from './providers/ApolloProvider';
+import GraphQLProvider from './providers/GraphQLProvider';
 
 export type RootLayoutProps = PropsWithChildren;
 
@@ -18,7 +17,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang='en'>
       <body className={mulish.className}>
-        <ApolloAppProvider>{children}</ApolloAppProvider>
+        <GraphQLProvider>{children}</GraphQLProvider>
       </body>
     </html>
   );

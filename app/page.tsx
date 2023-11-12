@@ -1,17 +1,16 @@
 'use client';
 
-import { useQuery } from '@apollo/client';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import Image from 'next/image';
-import { useState } from 'react';
-
 import Link from 'next/link';
-import { GET_PROPERTIES } from './apis/properties.api';
+import { useState } from 'react';
+import { getProperties } from './apis/properties.api';
 import PropertyAward from './components/Award';
 import Footer, { FooterProps } from './components/Footer';
 import Header, { HeaderProps } from './components/Header';
 import PropertyCard from './components/PropertyCard';
 import { MenuId } from './models/menu.model';
-import { IPropertiesResponse, IPropertyCategory } from './models/properties.model';
+import { IPropertyCategory } from './models/properties.model';
 
 const headerConfig: HeaderProps = {
   logo: {
@@ -144,47 +143,56 @@ const awards = [
   },
 ];
 
-const initCategory = 0;
+const initCategory = null;
 const initOffset = 0;
 const initLimit = 3;
 
-export default function Landing() {
-  const [idxCategory, setIdxCategory] = useState<number>(initCategory);
-  const { loading, error, data, fetchMore, refetch } = useQuery<IPropertiesResponse>(
-    GET_PROPERTIES,
-    {
-      notifyOnNetworkStatusChange: true,
-      variables: {
-        offset: initOffset,
-        limit: initLimit,
-        category: initCategory ? categories[initCategory] : null,
-      },
-    },
-  );
+const getCategoryLabel = (value: IPropertyCategory | null) => value ?? categories[0];
 
-  const handleChangeCategory = (newCategory: IPropertyCategory) => {
-    const _newIdxCategory = categories.findIndex((item) => item === newCategory);
-    setIdxCategory(_newIdxCategory);
-    refetch({
-      offset: initOffset,
-      category: _newIdxCategory ? categories[_newIdxCategory] : null,
-    });
+export default function Landing() {
+  const [category, setCategory] = useState<IPropertyCategory | null>(initCategory);
+  const {
+    isLoading,
+    isError,
+    isFetchingNextPage,
+    data,
+    hasNextPage,
+    isRefetching,
+    fetchNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['properties', category],
+    queryFn: ({ pageParam }) => {
+      return getProperties({
+        offset: pageParam,
+        limit: initLimit,
+        category,
+      });
+    },
+    initialPageParam: initOffset,
+    getNextPageParam: (lastPage, allPages, lastPageParam) => {
+      const nextPage = lastPageParam + initLimit;
+      return lastPage.propertyCollection.total > nextPage ? nextPage : null;
+    },
+  });
+
+  const handleChangeCategory = (newCategory: IPropertyCategory | string) => {
+    setCategory(newCategory === categories[0] ? null : (newCategory as IPropertyCategory));
   };
 
   const handleLoadMore = () => {
-    const newOffset = data?.propertyCollection.items.length!;
-    fetchMore({
-      variables: {
-        offset: newOffset,
-      },
-    });
+    fetchNextPage();
+  };
+
+  const handleRetry = () => {
+    refetch();
   };
 
   return (
     // TODO: Pending optimise responsive design on screens smaller than 1280vw
     <main className='relative flex w-full min-w-[1280px] flex-col overflow-y-auto overflow-x-hidden'>
       <Header {...headerConfig} />
-      {/* TODO: Move section to funcional comp */}
+      {/* TODO: Move section to funtional comp */}
       <section
         id={MenuId.HOME}
         className='flex min-h-[800px] flex-col items-center justify-center bg-lugar-blue bg-house-1 bg-right-bottom bg-no-repeat'
@@ -214,9 +222,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
-      {/* TODO: Move section to funcional comp */}
-      {!error && !!data?.propertyCollection.items.length && (
-        <section id={MenuId.PROJECTS} className='w-full bg-lugar-white'>
+      {/* TODO: Move section to funtional comp */}
+      {
+        <section id={MenuId.PROJECTS} className='flex min-h-[800px] w-full bg-lugar-white'>
           <div className='mx-auto mb-[48px] mt-[150px] flex w-full max-w-[1110px] flex-col text-lugar-dark'>
             <h2 className='max-w-[540px] text-[48px] font-bold leading-[120%] text-lugar-dark'>
               {'Properties'}
@@ -224,48 +232,75 @@ export default function Landing() {
             <p className='mt-[12px] max-w-[540px] text-[18px] font-normal leading-[120%] text-lugar-gray'>
               {'Turpis facilisis tempor pulvinar in lobortis ornare magna.'}
             </p>
-            <div className='mt-[30px] flex flex-col'>
-              <div className='mb-[10px] flex flex-row justify-end'>
-                <select
-                  className='bg-white cursor-pointer appearance-none whitespace-nowrap py-2 text-lugar-dark'
-                  value={categories[idxCategory]}
-                  disabled={loading}
-                  onChange={($event) =>
-                    handleChangeCategory($event.target.value as IPropertyCategory)
+            {!isLoading && !isError && (
+              <div className='mt-[30px] flex flex-col'>
+                <div className='mb-[10px] flex flex-row justify-end'>
+                  <select
+                    className='bg-white cursor-pointer appearance-none whitespace-nowrap py-2 text-lugar-dark'
+                    value={getCategoryLabel(category)}
+                    disabled={isFetchingNextPage}
+                    onChange={($event) => handleChangeCategory($event.target.value)}
+                  >
+                    {categories.map((item, index) => (
+                      <option key={index} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {!!data?.pages.length && (
+                  <div className='grid grid-cols-3 gap-[30px]'>
+                    {data.pages.map((page) =>
+                      page.propertyCollection.items.map((property) => (
+                        <PropertyCard
+                          key={property.id}
+                          address={property.address}
+                          title={property.title}
+                          url={property.image.url}
+                        />
+                      )),
+                    )}
+                  </div>
+                )}
+                {hasNextPage && (
+                  <button
+                    type='button'
+                    className='mx-auto mt-[32px] flex items-center justify-center bg-lugar-dark px-[24px] py-[18px] text-[14px] font-normal leading-[120%] text-lugar-white'
+                    disabled={isFetchingNextPage}
+                    onClick={() => handleLoadMore()}
+                  >
+                    {isFetchingNextPage ? 'Loading...' : 'Load more'}
+                  </button>
+                )}
+              </div>
+            )}
+            {isLoading && (
+              <span className='mx-auto my-[150px] text-lugar-dark'>{'Loading properties...'}</span>
+            )}
+            {isError && (
+              <div className='mx-auto my-[150px] flex max-w-[400px] flex-col items-center'>
+                <h3 className='text-center text-[36px] font-bold leading-[120%] text-lugar-dark'>
+                  {'Whoopsie daisy!'}
+                </h3>
+                <p className='mt-[24px] text-center text-lugar-gray'>
+                  {
+                    'Looks like a hiccup in the system. Our tech team is on it! Meanwhile, try refreshing or check back shortly. Thanks for your patience!'
                   }
-                >
-                  {categories.map((item, index) => (
-                    <option key={index} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className='grid grid-cols-3 gap-[30px]'>
-                {data?.propertyCollection.items.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    address={property.address}
-                    title={property.title}
-                    url={property.image.url}
-                  />
-                ))}
-              </div>
-              {data?.propertyCollection.total > data?.propertyCollection.items.length && (
+                </p>
                 <button
                   type='button'
-                  className='mx-auto mt-[32px] flex items-center justify-center bg-lugar-dark px-[24px] py-[18px] text-[14px] font-normal leading-[120%] text-lugar-white'
-                  disabled={loading}
-                  onClick={() => handleLoadMore()}
+                  className='mt-[32px] flex items-center justify-center bg-lugar-dark px-[24px] py-[18px] text-[14px] font-normal leading-[120%] text-lugar-white'
+                  disabled={isRefetching}
+                  onClick={() => handleRetry()}
                 >
-                  {loading ? 'Loading...' : 'Load more'}
+                  {isRefetching ? 'Retrying' : 'Retry'}
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </section>
-      )}
-      {/* TODO: Move section to funcional comp */}
+      }
+      {/* TODO: Move section to funtional comp */}
       <section
         id={MenuId.ABOUT}
         className='flex min-h-[800px] flex-col items-center justify-center'

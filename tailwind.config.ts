@@ -8,7 +8,6 @@ const config: Config = {
       'lugar-dark': '#1e3240',
       'lugar-white': '#ffffff',
       'lugar-gray': '#bdbdbd',
-      'lugar-gray-2': '#c4c4c4',
     },
     extend: {
       backgroundImage: {
