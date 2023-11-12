@@ -1,8 +1,5 @@
 {
   "files.associations": {
     "*.css": "tailwindcss"
-  },
-  "github-actions.workflows.pinned.workflows": [
-    ".github/workflows/nextjs.yml"
-  ],
+  }
 }

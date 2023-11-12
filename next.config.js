@@ -12,6 +12,9 @@ const nextConfig = {
       },
     ],
   },
+  env: {
+    CUSTOM_BASE_PATH: process.env.CUSTOM_BASE_PATH, // Force exposure of variables in server and client files
+  },
 };
 
 module.exports = nextConfig;
