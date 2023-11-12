@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Key, memo } from 'react';
+import { buildInternalImageUrl } from '../utils/url';
 
 export type PropertyCardProps = {
   address: string;
@@ -18,7 +19,7 @@ const PropertyCard = memo(function PropertyCard(props: PropertyCardProps) {
         <div className='ml-[2px] text-[14px] font-bold leading-[120%]'>{props.title}</div>
         <div className='flex flex-row items-center gap-1'>
           <Image
-            src={'/images/ic_outline-location-on.svg'}
+            src={buildInternalImageUrl('ic_outline-location-on.svg')}
             alt={'location icon'}
             width={12}
             height={12}

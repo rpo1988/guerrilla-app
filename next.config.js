@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
+  output: process.env.CUSTOM_OUTPUT,
+  basePath: process.env.CUSTOM_BASE_PATH,
   images: {
     remotePatterns: [
       // Contentful

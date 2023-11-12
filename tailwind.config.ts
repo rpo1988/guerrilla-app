@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss';
+import { buildInternalImageUrl } from './app/utils/url';
 
 const config: Config = {
   content: ['./app/**/*.{ts,tsx}'],
@@ -11,7 +12,7 @@ const config: Config = {
     },
     extend: {
       backgroundImage: {
-        'house-1': "url('/images/House 1.png')",
+        'house-1': `url('${buildInternalImageUrl('House 1.png')}')`,
       },
     },
   },

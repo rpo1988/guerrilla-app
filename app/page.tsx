@@ -11,10 +11,11 @@ import Header, { HeaderProps } from './components/Header';
 import PropertyCard from './components/PropertyCard';
 import { MenuId } from './models/menu.model';
 import { IPropertyCategory } from './models/properties.model';
+import { buildInternalImageUrl } from './utils/url';
 
 const headerConfig: HeaderProps = {
   logo: {
-    src: '/images/Lugar Logo black.svg',
+    src: buildInternalImageUrl('Lugar Logo black.svg'),
     alt: 'black lugar logo',
     width: 109.2,
     height: 16.79,
@@ -45,7 +46,7 @@ const headerConfig: HeaderProps = {
 const footerConfig: FooterProps = {
   left: {
     titleImg: {
-      src: '/images/Lugar Logo white.svg',
+      src: buildInternalImageUrl('Lugar Logo white.svg'),
       alt: 'white lugar logo',
       width: 94.72,
       height: 14.56,
@@ -53,20 +54,20 @@ const footerConfig: FooterProps = {
     items: [
       {
         text: '2118 Thornridge Cir.<br/>Dubai, UAE 35624',
-        icon: '/images/ic_round-location-on.svg',
+        icon: buildInternalImageUrl('ic_round-location-on.svg'),
         iconAlt: 'location icon',
         url: 'https://maps.google.com/?q=2118 Thornridge Cir. Dubai, UAE 35624',
         isInnerHtml: true,
       },
       {
         text: '+33 415 65356 - 9',
-        icon: '/images/ic_baseline-phone.svg',
+        icon: buildInternalImageUrl('ic_baseline-phone.svg'),
         iconAlt: 'phone icon',
         url: 'tel:+3341565356',
       },
       {
         text: 'contact@lugar.com',
-        icon: '/images/ic_baseline-email.svg',
+        icon: buildInternalImageUrl('ic_baseline-email.svg'),
         iconAlt: 'email icon',
         url: 'mailto:contact@lugar.com',
       },
@@ -308,7 +309,7 @@ export default function Landing() {
         <div className='flex w-full max-w-[1110px] items-center'>
           <div className='h-[500px] w-[445px] flex-shrink-0'>
             <Image
-              src={'/images/left bg.png'}
+              src={buildInternalImageUrl('left bg.png')}
               alt={'white building front picture'}
               width={445}
               height={500}
